@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>pers.prover07.crowd</groupId>
+    <artifactId>crowd-member-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>crowd-member-eureka</module>
+        <module>crowd-member-entity</module>
+        <module>crowd-member-data-mysql</module>
+        <module>crowd-member-data-redis</module>
+        <module>crowd-member-auth</module>
+        <module>crowd-member-service-project</module>
+        <module>crowd-member-service-order</module>
+        <module>crowd-member-service-pay</module>
+        <module>crowd-member-eureka</module>
+        <module>crowd-member-service-pay</module>
+        <module>crowd-member-feign</module>
+        <module>crowd-member-gateway</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- SpringBoot 这里使用 2.3.x -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.3.11.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- SpringCloud 使用 SR9 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Hoxton.SR9</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.1</version>
+            </dependency>
+            <!--druid数据库连接池依赖-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

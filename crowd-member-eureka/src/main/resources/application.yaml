@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: crowd-member-eureka
+
+server:
+  port: 7100
+
+eureka:
+  # eureka 服务端实例的名称
+  instance:
+    hostname: localhost
+  client:
+    # 本模块不会注册到 Eureka 注册中心
+    register-with-eureka: false
+    # 表示自己是注册中心，负责维护服务注册，不需要进行服务检索
+    fetch-registry: false
+    # Eureka Service 服务端访问中心
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

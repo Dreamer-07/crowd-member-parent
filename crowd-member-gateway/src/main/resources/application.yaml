@@ -1,0 +1,26 @@
+server:
+  port: 80
+spring:
+  application:
+    name: crowd-member-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+      routes:
+        - id: auth_route
+          uri: lb://crowd-member-auth
+          predicates:
+            - Path=/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7100/eureka
+    register-with-eureka: true
+    fetch-registry: true
+# 配置Gateway日志等级，输出转发细节信息
+logging:
+  level:
+    org.springframework.cloud.gateway: debug

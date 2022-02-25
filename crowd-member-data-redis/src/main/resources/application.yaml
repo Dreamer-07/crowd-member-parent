@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: crowd-member-data-redis
+  redis:
+    host: 192.168.227.30
+    port: 6379
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0

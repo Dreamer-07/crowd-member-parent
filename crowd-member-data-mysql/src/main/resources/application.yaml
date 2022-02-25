@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: crowd-member-data-mysql
+  datasource:
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/crowd_member?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    druid:
+      initial-size: 5
+      max-active: 10
+
+# 修改 Mybatis Plus 日志输出等级
+logging:
+  level:
+    pers.prover07.crowd.**.mapper: debug
+    pers.prover07.crowd.**.test: debug
