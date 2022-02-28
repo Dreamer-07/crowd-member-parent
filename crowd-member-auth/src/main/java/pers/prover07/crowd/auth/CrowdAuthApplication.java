@@ -10,7 +10,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  * @description TODO
  * @date 2022/2/25 20:53
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "pers.prover07.crowd")
 @EnableEurekaClient
 public class CrowdAuthApplication {
 

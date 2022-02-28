@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: crowd-member-data-mysql
   datasource:
     username: root
     password: root
@@ -11,7 +9,6 @@ spring:
       max-active: 10
 
 # 修改 Mybatis Plus 日志输出等级
-logging:
-  level:
-    pers.prover07.crowd.**.mapper: debug
-    pers.prover07.crowd.**.test: debug
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

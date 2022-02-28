@@ -3,9 +3,19 @@ server:
 spring:
   application:
     name: crowd-member-auth
+  profiles:
+    active: redis, mysql
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:7100/eureka
     register-with-eureka: true
     fetch-registry: true
+short:
+  message:
+    host: https://dfsns.market.alicloudapi.com
+    path: /data/send_sms
+    method: POST
+    appcode: dda247773bc842f29528f477fa510941
+    templateId: TPL_0000
+    expiredMinute: 5

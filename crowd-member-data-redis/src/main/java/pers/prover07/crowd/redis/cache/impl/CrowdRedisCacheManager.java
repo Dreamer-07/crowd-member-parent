@@ -9,11 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @description: 移动端Redis缓存实现类
- * @author: YuXD
- * @create: 2021-01-05 10:40
- **/
 public final class CrowdRedisCacheManager implements IGlobalCache {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -325,8 +320,9 @@ public final class CrowdRedisCacheManager implements IGlobalCache {
     public boolean lSetAll(String key, List<Object> value, long time) {
         try {
             redisTemplate.opsForList().leftPushAll(key, value);
-            if (time > 0)
+            if (time > 0) {
                 expire(key, time);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -376,8 +372,9 @@ public final class CrowdRedisCacheManager implements IGlobalCache {
     public boolean rSetAll(String key, List<Object> value, long time) {
         try {
             redisTemplate.opsForList().rightPushAll(key, value);
-            if (time > 0)
+            if (time > 0) {
                 expire(key, time);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();

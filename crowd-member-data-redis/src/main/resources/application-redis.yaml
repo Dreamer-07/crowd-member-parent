@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: crowd-member-data-redis
   redis:
     host: 192.168.227.30
     port: 6379

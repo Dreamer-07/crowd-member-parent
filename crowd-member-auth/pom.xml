@@ -31,9 +31,42 @@
         </dependency>
         <dependency>
             <groupId>pers.prover07.crowd</groupId>
-            <artifactId>crowd-member-feign</artifactId>
+            <artifactId>crowd-member-data-redis</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>pers.prover07.crowd</groupId>
+            <artifactId>crowd-member-data-mysql</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>pers.prover07.crowd</groupId>
+            <artifactId>crowd-common-util</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
+
+    <!-- 在打包的时候排除该依赖，应该该依赖只是在开发的使用有用，部署没必要 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
