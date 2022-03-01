@@ -1,5 +1,6 @@
 package pers.prover07.crowd.auth.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,10 @@ import pers.prover07.crowd.auth.config.properties.ShortMessageProperties;
 import pers.prover07.crowd.auth.service.MemberService;
 import pers.prover07.crowd.po.MemberPo;
 import pers.prover07.crowd.redis.cache.IGlobalCache;
+import pers.prover07.crowd.vo.MemberLoginVo;
 import pers.prover07.crowd.vo.MemberVo;
 
+import javax.servlet.http.HttpSession;
 import java.util.Objects;
 
 /**
@@ -89,11 +92,46 @@ public class MemberController {
         MemberPo memberPo = new MemberPo();
         BeanUtils.copyProperties(memberVo, memberPo);
         boolean isSuccess = memberService.save(memberPo);
-        if (isSuccess) {
+        if (!isSuccess) {
             model.addAttribute(CrowdAttrNameConstant.EXCEPTION_INFO, "登录账号(loginAcct)重复");
             return "register";
         }
-        return "";
+        return "redirect:/auth/login";
+    }
+
+
+    @PostMapping("/login")
+    public String loginMember(
+            @RequestParam String loginAcct, @RequestParam String password,
+            Model model, HttpSession session
+    ) {
+        // 根据 loginAcct 查询数据库数据
+        QueryWrapper<MemberPo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("login_acct", loginAcct);
+        MemberPo memberPo = memberService.getOne(queryWrapper);
+        if (memberPo == null) {
+            // 用户不存在
+            model.addAttribute(CrowdAttrNameConstant.EXCEPTION_INFO, HttpRespMsgConstant.ADMIN_NOT_EXISTS);
+            return "login";
+        }
+
+        // 比较密码
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        boolean isSuccess = passwordEncoder.matches(password, memberPo.getPassword());
+        if (isSuccess) {
+            // 密码错误
+            model.addAttribute(CrowdAttrNameConstant.EXCEPTION_INFO, HttpRespMsgConstant.LOGIN_FAILED);
+            return "login";
+        }
+
+        // 创建 MemberLoginVo 对象
+        MemberLoginVo memberLoginVo = MemberLoginVo.createObjByMemberPo(memberPo);
+
+        // 将登录对象保存到 Session 中
+        session.setAttribute(CrowdAttrNameConstant.LOGIN_MEMBER, memberLoginVo);
+
+        // 返回到首页
+        return "redirect:/page/member_center";
     }
 
 }

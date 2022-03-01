@@ -23,6 +23,19 @@
 
 ## 后端
 
+### 实体类进一步细分
+
+1. VO 视图对象
+   - 接收游览器发送的对象
+   - 把数据响应回给游览器去显示
+2. PO 持久化对象
+   - 将数据封装到 PO 对象并存入数据库
+   - 将数据库查询i出来的数据封装到 PO 对象
+3. DO 数据对象
+   - 从 各种中间件/第三方接口 中查询出来的数据，例如：Redis / ElasticSearch ...
+4. DTO 数据传输对象
+   - 微服务之间通信时使用的数据对象
+
 ### SpringBoot 整合 Redis
 
 1. 导入依赖
@@ -921,20 +934,247 @@
    }
    ```
 
+### SpringCloud Zuul 解决重定向问题
+
+在微服务模块中使用 **redirect** 进行重定向时，会出现不走网关而是直接通过端口访问微服务模块的情况
+
+在配置文件中添加以下配置
+
+```yaml
+zuul:
+  add-host-header: true
+```
+
+### SpringCloud Zuul 整合 Spring Session
+
+1. 首先为 zuul 微服务模块引入 **Spring Session** 的环境
+
+2. 在配置文件中配置不需要受登录检查的资源路径
+
+   ```yaml
+   ignore:
+     whites:
+       - /
+       - /auth/**
+       - /**/*.css
+       - /**/*.js
+       - /**/fonts/**
+       - /**/img/**
+   ```
+
+3. 创建一个 **Properties** 类将其读取到容器中
+
+   ```java
+   @Component
+   @ConfigurationProperties(prefix = "ignore")
+   @Data
+   public class IgnoreWhitesProperties {
    
+       private HashSet<String> whites;
+   
+   }
+   ```
 
-### 实体类进一步细分
+4. 创建一个配置类，将 **AntPathMatcher** (ant风格匹配器) 注册到容器中
 
-1. VO 视图对象
-   - 接收游览器发送的对象
-   - 把数据响应回给游览器去显示
-2. PO 持久化对象
-   - 将数据封装到 PO 对象并存入数据库
-   - 将数据库查询i出来的数据封装到 PO 对象
-3. DO 数据对象
-   - 从 各种中间件/第三方接口 中查询出来的数据，例如：Redis / ElasticSearch ...
-4. DTO 数据传输对象
-   - 微服务之间通信时使用的数据对象
+   ```java
+   @Configuration
+   public class WebGatewayConfig {
+   
+       @Bean
+       public PathMatcher pathMatcher() {
+           return new AntPathMatcher();
+       }
+   
+   }
+   ```
+
+5. 创建过滤器类并经常 **ZuulFilter** 后重写其中的方法
+
+   ```java
+   @Component
+   public class AccessFilter extends ZuulFilter {
+   
+       @Autowired
+       private PathMatcher pathMatcher;
+   
+       @Autowired
+       private IgnoreWhitesProperties ignoreWhitesProperties;
+   
+       /**
+        * 返回 pre 表示在请求转发到微服务之前过滤
+        * @return
+        */
+       @Override
+       public String filterType() {
+           return "pre";
+       }
+   
+       /**
+        * filter 执行顺序
+        * @return
+        */
+       @Override
+       public int filterOrder() {
+           return 0;
+       }
+   
+       /**
+        * 判断资源是否需要过滤
+        * @return true：需要过滤; false: 不需要过滤
+        */
+       @Override
+       public boolean shouldFilter() {
+           // 获取当前请求路径
+           // 框架底层借助了 ThreadLocal 可以获取事先绑定在当前线程上的 Request 对象
+           String servletPath = RequestContext.getCurrentContext().getRequest().getServletPath();
+           // 获取白名单集合
+           HashSet<String> whites = ignoreWhitesProperties.getWhites();
+           return !whites.stream().anyMatch(white -> pathMatcher.match(white, servletPath));
+       }
+   
+       /**
+        * 具体过滤业务逻辑
+        * @return
+        * @throws ZuulException
+        */
+       @Override
+       public Object run() throws ZuulException {
+           // 获取 Session 对象
+           HttpSession session = RequestContext.getCurrentContext().getRequest().getSession();
+           // 获取 session 中的登录对象
+           Object loginMember = session.getAttribute(CrowdAttrNameConstant.LOGIN_MEMBER);
+           // 如果未登录就重定向到登录页面
+           if (loginMember == null) {
+               try {
+                   RequestContext.getCurrentContext().getResponse().sendRedirect("/auth/login");
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+           }
+           // 正常的话返回 null 即可
+           return null;
+       }
+   }
+   ```
+
+6. 重启服务即可
+
+### 使用 Session 共享技术解决分布式下 Session 不互通的问题
+
+#### 会话控制回顾
+
+> Cookie 的工作机制
+
+服务端返回 Cookie 信息给游览器
+
+- Java 代码：response.addCookie(cookie对象)
+- Http 响应头信息：Set-Cookie: cookie.name=cookie.value
+
+游览器接收到服务端返回的 Cookie 后，之后的每一次请求都会携带 Cookie
+
+- Http 请求头信息：Cookie: cookie.name=cookie.value
+
+> Session 的工作机制
+
+获取 Session 对象：request.getSession()
+
+- 检查当前请求是否携带了 **JESSIONID** 这个 Cookie
+  - 带了：根据 **JESSIONID** 在服务器端查找对应的 Session 对象
+    - 在服务器中找到：返回对应的 Session 对象
+    - 在服务器中没有找到(过期等原因)：新建 Session 对象，同时返回 cookie.name=JESSIONID 的 Cookie
+  - 没带：新建 Session 对象，同时返回 cookie.name=JESSIONID 的 Cookie
+
+#### 解决方案
+
+1. Session 同步
+   - 具体方案：通过修改 Tomcat 配置实现 Session 共享
+   - 缺点
+     1. 该方案原理需要让 Session 在各个 Tomcat 服务器上 **同量** 保存，会导致 Tomcat 性能下降
+     2. 数据同步对性能有一定影响
+2. 将 Session 数据存储到 Cookie 中
+   - 具体方案：所有会话数据在游览器端中用 Cookie 保存，服务端不存储任何数据
+   - 好处：减小了服务器端数据存储的压力，不会有 Session 不一致问题
+   - 缺点
+     1. Cookie 存储的数据大小非常有限，一般是 4kb
+     2. Cookie 数据存储在游览器端，一般不受服务器端控制，如果游览器端清理 Cookie，相关数据会丢失
+3. 反向代理 hash 一致性
+   - 具体方案：通过反向代理的客户端存储每一个 IP 和指定服务器的关系，让一个 IP 携带的请求只会转发到指定的服务器
+   - 缺点：
+     1. 如果服务器宕机，会丢失数据，存在单点故障
+     2. 仅仅适用于集群范围内，超出集群范围的服务器无效
+4. **后端统一存储 Session 数据**
+   - 具体方案：使用 Redis 这样的内存数据库存储 Session 数据
+   - 好处：
+     1. Session 数据存取比较频繁，内存访问速度快
+     2. Session 有过期时间，Redis 这样的内存数据库能够比较方便实现过期释放
+     3. Redis 可以配置 主从模式 + 哨兵模式，不担心单点故障
+
+#### SpringSession 使用
+
+1. 导入依赖
+
+   ```xml
+   <!-- SpringSession -->
+   <dependency>
+       <groupId>org.springframework.session</groupId>
+       <artifactId>spring-session-data-redis</artifactId>
+   </dependency>
+   
+   <!-- Redis -->
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-data-redis</artifactId>
+   </dependency>
+   <dependency>
+       <groupId>org.apache.commons</groupId>
+       <artifactId>commons-pool2</artifactId>
+   </dependency>
+   ```
+
+2. 编写配置文件
+
+   ```yaml
+   spring:
+     redis:
+       host: 192.168.227.30
+       port: 6379
+       timeout: 10000
+       lettuce:
+         pool:
+           max-active: 8
+           max-wait: -1
+           max-idle: 8
+           min-idle: 0
+     # 设置 SpringSession 使用 redis 进行统一存储
+     session:
+       store-type: redis
+   ```
+
+3. 使用 `HttpSession` 即可
+
+   ```java
+   // 将登录对象保存到 Session 中
+   session.setAttribute(CrowdAttrNameConstant.LOGIN_MEMBER, memberLoginVo);
+   ```
+
+4. 查看 Redis 数据库
+
+   ![image-20220301105448652](README.assets/image-20220301105448652.png)
+
+#### SpringSession 原理
+
+> SpringSession 需要完成的任务
+
+![image-20220228141127919](README.assets/image-20220228141127919.png)
+
+> SessionRespositoryFilter
+
+利用 Filter 原理，在请求每次到达目标方法前，将原生的 request&response 进行包装，重写其中关于 Session 的方法即可
+
+
+
+
 
 ## 其他
 

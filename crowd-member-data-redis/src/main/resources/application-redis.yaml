@@ -9,3 +9,6 @@ spring:
         max-wait: -1
         max-idle: 8
         min-idle: 0
+  # 设置 SpringSession 使用 redis 进行统一存储
+  session:
+    store-type: redis

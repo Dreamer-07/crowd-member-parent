@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
@@ -22,6 +23,7 @@ import java.sql.Timestamp;
 @ToString
 @TableName(value = "member")
 public class MemberPo {
+
 
     @TableId(type = IdType.ASSIGN_ID)
     private String id;

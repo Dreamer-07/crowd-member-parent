@@ -57,6 +57,14 @@
                 <artifactId>druid-spring-boot-starter</artifactId>
                 <version>1.2.3</version>
             </dependency>
+            <!-- SpringSession -->
+            <dependency>
+                <groupId>org.springframework.session</groupId>
+                <artifactId>spring-session-bom</artifactId>
+                <version>Dragonfruit-SR3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

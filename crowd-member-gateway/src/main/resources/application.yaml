@@ -3,17 +3,16 @@ server:
 spring:
   application:
     name: crowd-member-gateway
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-
-      routes:
-        - id: auth_route
-          uri: lb://crowd-member-auth
-          predicates:
-            - Path=/**
+  profiles:
+    active: redis
+zuul:
+  ignored-services: "*"       # 表示忽视直接通过application-name访问微服务，必须通过route
+  sensitive-headers: "*"      # 在Zuul向其他微服务重定向时，保持原本的头信息（请求头、响应头）
+  add-host-header: true
+  routes:
+    route_auth:
+      service-id: crowd-member-auth
+      path: /**
 eureka:
   client:
     service-url:
@@ -24,3 +23,12 @@ eureka:
 logging:
   level:
     org.springframework.cloud.gateway: debug
+
+ignore:
+  whites:
+    - /
+    - /auth/**
+    - /**/*.css
+    - /**/*.js
+    - /**/fonts/**
+    - /**/img/**
