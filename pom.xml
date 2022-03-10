@@ -20,6 +20,7 @@
         <module>crowd-member-service-pay</module>
         <module>crowd-member-feign</module>
         <module>crowd-member-gateway</module>
+        <module>crowd-member-data-rabbitmq</module>
     </modules>
     <packaging>pom</packaging>
 

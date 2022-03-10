@@ -943,6 +943,7 @@
 ```yaml
 zuul:
   add-host-header: true
+  sensitive-headers:		# 设置为空表示转发到各个微服务时 Session 一致
 ```
 
 ### SpringCloud Zuul 整合 Spring Session
@@ -1172,7 +1173,128 @@ zuul:
 
 利用 Filter 原理，在请求每次到达目标方法前，将原生的 request&response 进行包装，重写其中关于 Session 的方法即可
 
+### Java 程序调用 OSS 服务接口
 
+1. 在阿里云服务上开通 OSS 服务
+
+2. 创建对应的子用户并分配管理 OSS 的权限后得到对应的 **AccessKeyId & AccessKeySecret**
+
+   ```
+   用户登录名称 project-crwod@1079625805735056.onaliyun.com
+   AccessKey ID LTAI5tByzqHLYumrUstmYSS4
+   AccessKey Secret YA0HsprfrBiUQtUh5KblS8bcpR1Fsg
+   ```
+
+3. 引入 OSS 的 SDK 依赖
+
+   ```xml
+   <dependency>
+       <groupId>com.aliyun.oss</groupId>
+       <artifactId>aliyun-sdk-oss</artifactId>
+       <version>3.10.2</version>
+   </dependency>
+   ```
+
+4. 创建工具方法
+
+   ```java
+   ```
+
+### Mybatis Plus Generator(新)
+
+> 配置文档：https://baomidou.com/pages/981406/#%E7%AD%96%E7%95%A5%E9%85%8D%E7%BD%AE-strategyconfig
+
+1. 导入依赖
+
+   ```xml
+   <dependencies>
+       <dependency>
+           <groupId>com.baomidou</groupId>
+           <artifactId>mybatis-plus-boot-starter</artifactId>
+           <version>3.4.3.1</version>
+       </dependency>
+       <dependency>
+           <groupId>com.baomidou</groupId>
+           <artifactId>mybatis-plus-generator</artifactId>
+           <version>3.5.1</version>
+       </dependency>
+       <dependency>
+           <groupId>org.apache.velocity</groupId>
+           <artifactId>velocity-engine-core</artifactId>
+           <version>2.3</version>
+       </dependency>
+       <dependency>
+           <groupId>mysql</groupId>
+           <artifactId>mysql-connector-java</artifactId>
+           <scope>runtime</scope>
+       </dependency>
+       <dependency>
+           <groupId>org.projectlombok</groupId>
+           <artifactId>lombok</artifactId>
+           <optional>true</optional>
+       </dependency>
+   </dependencies>
+   ```
+
+2. 编写启动类 **MyBatisPlusGenerator**
+
+   ```java
+   private final static String JDBC_URL = "jdbc:mysql://localhost:3306/crowd_member?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+   
+   public static void main(String[] args) {
+       // 数据库配置
+       DataSourceConfig.Builder dataSourceConfig = new DataSourceConfig.Builder(JDBC_URL, "root", "root");
+   
+       FastAutoGenerator
+           .create(dataSourceConfig)
+           // 全局配置
+           .globalConfig(builder -> {
+               // 设置输出路径
+               builder.outputDir(System.getProperty("user.dir") + "/src/main/java")
+                   // 设置作者名
+                   .author("prover07")
+                   // 指定日期类型
+                   .dateType(DateType.SQL_PACK)
+                   // 不打开文件夹
+                   .disableOpenDir();
+           })
+           // 包配置
+           .packageConfig(builder -> {
+               // 父包
+               builder.parent("pers.prover.crowd");
+               // 模块包名
+               builder.moduleName("reverse");
+               // 存放实体类用的包名
+               builder.entity("po");
+               // 指定 xml 生成位置
+               builder.pathInfo(Collections.singletonMap(OutputFile.mapperXml, System.getProperty("user.dir") + "/src/main/resources/mapper"));
+           })
+           // 模板配置
+           .templateConfig(builder -> {
+               // 不生成 Controller
+               builder.disable(TemplateType.CONTROLLER);
+           })
+           // 策略配置
+           .strategyConfig(builder -> {
+               // 配置 Service,默认的 Service 接口是 IxxxService
+               builder.serviceBuilder()
+                   .formatServiceFileName("%sService");
+   
+               // 配置实体类
+               builder.entityBuilder()
+                   // 开启 lombok
+                   .enableLombok()
+                   // 生成字段注释
+                   .enableTableFieldAnnotation();
+           })
+           // 执行生成
+           .execute();
+   }
+   ```
+
+3. 执行即可
+
+   ![image-20220301162358995](README.assets/image-20220301162358995.png)
 
 
 

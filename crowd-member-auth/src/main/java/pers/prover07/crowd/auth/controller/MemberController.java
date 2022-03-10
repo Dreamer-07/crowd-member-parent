@@ -1,7 +1,6 @@
 package pers.prover07.crowd.auth.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -65,6 +64,12 @@ public class MemberController {
             return ResultEntity.fail(HttpRespMsgConstant.SYSTEM_ERROR_REDIS_SAVE);
         }
         return ResultEntity.fail(HttpRespMsgConstant.AUTH_SEND_MESSAGE_ERROR);
+    }
+
+    @GetMapping("/logout")
+    public String register(HttpSession session) {
+        session.invalidate();
+        return "redirect:/auth/login";
     }
 
     @PostMapping("/register")

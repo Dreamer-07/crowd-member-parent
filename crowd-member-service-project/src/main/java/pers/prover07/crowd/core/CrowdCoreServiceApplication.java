@@ -1,23 +1,21 @@
-package pers.prover07.crowd.gateway;
+package pers.prover07.crowd.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
 /**
  * @author by Prover07
- * @classname CrowdGatewayApplication
+ * @classname CrowdCoreServiceApplication
  * @description TODO
- * @date 2022/2/25 21:47
+ * @date 2022/3/1 14:32
  */
 @EnableEurekaClient
 @SpringBootApplication(scanBasePackages = {"pers.prover07.crowd"})
-@EnableZuulProxy
-public class CrowdGatewayApplication {
+public class CrowdCoreServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CrowdGatewayApplication.class, args);
+        SpringApplication.run(CrowdCoreServiceApplication.class, args);
     }
 
 }

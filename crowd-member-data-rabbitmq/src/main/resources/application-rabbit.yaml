@@ -1,0 +1,8 @@
+spring:
+  rabbitmq:
+    host: 192.168.227.30
+    port: 5672
+    username: guest
+    password: guest
+#    publisher-confirm-type: correlated  # 开启发布确认
+#    publisher-returns: true             # 开启消息回退，交换机找不到队列时，会直接丢弃消息返回给生产者

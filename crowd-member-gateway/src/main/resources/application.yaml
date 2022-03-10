@@ -7,12 +7,17 @@ spring:
     active: redis
 zuul:
   ignored-services: "*"       # 表示忽视直接通过application-name访问微服务，必须通过route
-  sensitive-headers: "*"      # 在Zuul向其他微服务重定向时，保持原本的头信息（请求头、响应头）
+  sensitive-headers:
   add-host-header: true
   routes:
     route_auth:
       service-id: crowd-member-auth
       path: /**
+    route_project:
+      service-id: crowd-member-service-project
+      path: /project/**
+      strip-prefix: false     # 默认转发时会删除前缀，这里设置 strip-prefix 即可
+
 eureka:
   client:
     service-url:
