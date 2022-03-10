@@ -12,7 +12,7 @@ import pers.prover.crowd.constant.CrowdAttrNameConstant;
 import pers.prover.crowd.util.CrowdUtil;
 import pers.prover.crowd.util.ResultEntity;
 import pers.prover07.crowd.core.config.properties.OSSClientProperties;
-import pers.prover07.crowd.core.service.ProjectService;
+import pers.prover07.crowd.mysql.service.ProjectService;
 import pers.prover07.crowd.vo.MemberConfirmInfoVO;
 import pers.prover07.crowd.vo.MemberLoginVo;
 import pers.prover07.crowd.vo.PayBackVO;

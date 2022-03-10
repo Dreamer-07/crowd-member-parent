@@ -13,9 +13,9 @@ import pers.prover.crowd.constant.RedisKeyConstant;
 import pers.prover.crowd.util.CrowdUtil;
 import pers.prover.crowd.util.ResultEntity;
 import pers.prover07.crowd.auth.config.properties.ShortMessageProperties;
-import pers.prover07.crowd.auth.service.MemberService;
 import pers.prover07.crowd.po.MemberPo;
 import pers.prover07.crowd.redis.cache.IGlobalCache;
+import pers.prover07.crowd.mysql.service.MemberService;
 import pers.prover07.crowd.vo.MemberLoginVo;
 import pers.prover07.crowd.vo.MemberVo;
 
